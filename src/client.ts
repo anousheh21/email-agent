@@ -1,6 +1,7 @@
 import "dotenv/config";
+import open from "open";
 import { Client, StreamableHTTPClientTransport, UnauthorizedError } from "@modelcontextprotocol/client";
-import type { OAuthClientMetadata, OAuthClientProvider } from "@modelcontextprotocol/client";
+import type { OAuthClientMetadata, OAuthClientProvider, OAuthTokens } from "@modelcontextprotocol/client";
 
 const clientId = getRequiredEnv(process.env.GMAIL_AUTH_CLIENT_ID);
 const clientSecret = getRequiredEnv(process.env.GMAIL_AUTH_CLIENT_SECRET);
@@ -10,6 +11,9 @@ if (!clientId || !clientSecret) {
 }
 
 class GmailOAuthProvider implements OAuthClientProvider {
+    private storedTokens?: OAuthTokens;    
+    private verifier?: string;
+
     readonly redirectUrl = 'http://localhost:8090/callback';
     readonly clientMetadata: OAuthClientMetadata = {
         client_name: 'Email Agent',
@@ -22,6 +26,28 @@ class GmailOAuthProvider implements OAuthClientProvider {
             client_id: clientId,
             client_secret: clientSecret
         }
+    }
+
+    tokens() {
+        return this.storedTokens;
+    }
+
+    saveTokens(tokens: OAuthTokens) {
+        // TODO: the docs said "in production, persist OS keychain / secure storage - never plain files" - do this to prevent the user having to log in every time
+        this.storedTokens = tokens;
+    }
+
+    async redirectToAuthorization(url: URL) {
+        await onRedirect(url);
+    }
+
+    saveCodeVerifier(v: string) {
+        this.verifier = v;
+    }
+
+    codeVerifier() {
+        if (!this.verifier) throw new Error('no code verifier');
+        return this.verifier;
     }
     
 }
@@ -61,6 +87,10 @@ function getRequiredEnv(name: string | undefined): string {
     }
 
     return value;
+}
+
+async function onRedirect(url: URL) {
+    await open(url.toString());
 }
 
 // Might be worth doing another tool call here, to double check that the auth persists
