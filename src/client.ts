@@ -96,6 +96,7 @@ console.log(tools.map(tool => tool.name));
 
 const result = await client.callTool({ name: 'search_threads', arguments: { query: 'from: google '}});
 console.log(result.content);
+await client.close();
 
 function getRequiredEnv(name: string | undefined): string {
     if (!name) {
