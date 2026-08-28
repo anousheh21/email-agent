@@ -1,7 +1,7 @@
 import "dotenv/config";
 import open from "open";
 import http from "node:http";
-import { Client, StreamableHTTPClientTransport, UnauthorizedError } from "@modelcontextprotocol/client";
+import { auth, Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
 import type { OAuthClientMetadata, OAuthClientProvider, OAuthDiscoveryState, OAuthTokens } from "@modelcontextprotocol/client";
 
 const clientId = getRequiredEnv('GMAIL_AUTH_CLIENT_ID');
@@ -75,34 +75,25 @@ const client = new Client({ name: 'gmail-client', version: '1.0.0' });
 
 const transport = new StreamableHTTPClientTransport(mcpUrl, { authProvider: provider });
 
-console.log("Connecting to Gmail MCP server...");
-const callbackPromise = waitForCallback();
+// const callbackPromise = waitForCallback();
+await auth(provider, { serverUrl: mcpUrl });
 
-try {
-    await client.connect(transport);
-} catch (error) {
-    if (!(error instanceof UnauthorizedError)) throw error;
-    console.log("Authentication required. Complete sign-in in your browser.");
-}
-
-// Finish the flow from the callback
-const callbackUrl = await callbackPromise;
+// const callbackUrl = await callbackPromise;
+const callbackUrl = await waitForCallback();
 console.log("Authentication callback received. Exchanging authorization code...");
 const params = new URL(callbackUrl).searchParams;
 
 if (params.get('state') !== provider.lastState) throw new Error('state mismatch');
 
 await transport.finishAuth(params);
-console.log("Authorization complete. Reconnecting to Gmail MCP server...");
-await client.connect(new StreamableHTTPClientTransport(mcpUrl, { authProvider: provider }));
-console.log("Connected to Gmail MCP server.");
+console.log("Authorization complete.");
 
+await client.connect(transport);
 
 // List out tools
 const { tools } = await client.listTools();
 console.log(tools.map(tool => tool.name));
 
-// Not working because you have to implement auth!
 const result = await client.callTool({ name: 'search_threads', arguments: { query: 'from: google '}});
 console.log(result.content);
 
