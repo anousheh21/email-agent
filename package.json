@@ -21,8 +21,10 @@
     "vitest": "^4.1.11"
   },
   "dependencies": {
+    "@google-cloud/local-auth": "^2.1.0",
     "@modelcontextprotocol/client": "^2.0.0",
     "dotenv": "^17.4.2",
+    "googleapis": "^105.0.0",
     "open": "^11.0.1"
   }
 }
