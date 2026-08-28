@@ -2,10 +2,10 @@ import "dotenv/config";
 import open from "open";
 import http from "node:http";
 import { Client, StreamableHTTPClientTransport, UnauthorizedError } from "@modelcontextprotocol/client";
-import type { OAuthClientMetadata, OAuthClientProvider, OAuthTokens } from "@modelcontextprotocol/client";
+import type { OAuthClientMetadata, OAuthClientProvider, OAuthDiscoveryState, OAuthTokens } from "@modelcontextprotocol/client";
 
-const clientId = getRequiredEnv(process.env.GMAIL_AUTH_CLIENT_ID);
-const clientSecret = getRequiredEnv(process.env.GMAIL_AUTH_CLIENT_SECRET);
+const clientId = getRequiredEnv('GMAIL_AUTH_CLIENT_ID');
+const clientSecret = getRequiredEnv('GMAIL_AUTH_CLIENT_SECRET');
 
 if (!clientId || !clientSecret) {
     throw new Error("Missing OAuth credentials");
@@ -16,13 +16,14 @@ const mcpUrl = new URL('https://gmailmcp.googleapis.com/mcp/v1');
 class GmailOAuthProvider implements OAuthClientProvider {
     private storedTokens?: OAuthTokens;    
     private verifier?: string;
+    private discovery?: OAuthDiscoveryState;
     lastState?: string;
 
     readonly redirectUrl = 'http://localhost:8090/callback';
     readonly clientMetadata: OAuthClientMetadata = {
         client_name: 'Email Agent',
         redirect_uris: ['http://localhost:8090/callback'],
-        application_type: 'web application'
+        application_type: 'native'
     };
 
     clientInformation() {
@@ -44,6 +45,14 @@ class GmailOAuthProvider implements OAuthClientProvider {
     state() {
         this.lastState = crypto.randomUUID();
         return this.lastState;
+    }
+
+    saveDiscoveryState(state: OAuthDiscoveryState) {
+        this.discovery = state;
+    }
+
+    discoveryState() {
+        return this.discovery;
     }
 
     async redirectToAuthorization(url: URL) {
@@ -116,10 +125,19 @@ async function waitForCallback(): Promise<string> {
                 return;
             }
 
-            resolve(req.url);
+            res.statusCode = 200;
+            res.end("Authentication complete. You can close this tab.");
+
+            server.close();
+
+            resolve(`http://localhost:8090${req.url}`);
         })
 
-        server.listen(8090);
+        server.on("error", (error) => {
+            reject(error);
+        })
+
+        server.listen(8090, "127.0.0.1");
    })
 }
 
