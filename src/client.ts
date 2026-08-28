@@ -76,6 +76,7 @@ const client = new Client({ name: 'gmail-client', version: '1.0.0' });
 const transport = new StreamableHTTPClientTransport(mcpUrl, { authProvider: provider });
 
 console.log("Connecting to Gmail MCP server...");
+const callbackPromise = waitForCallback();
 
 try {
     await client.connect(transport);
@@ -85,7 +86,7 @@ try {
 }
 
 // Finish the flow from the callback
-const callbackUrl = await waitForCallback();
+const callbackUrl = await callbackPromise;
 console.log("Authentication callback received. Exchanging authorization code...");
 const params = new URL(callbackUrl).searchParams;
 
