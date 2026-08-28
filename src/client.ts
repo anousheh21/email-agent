@@ -75,20 +75,26 @@ const client = new Client({ name: 'gmail-client', version: '1.0.0' });
 
 const transport = new StreamableHTTPClientTransport(mcpUrl, { authProvider: provider });
 
+console.log("Connecting to Gmail MCP server...");
+
 try {
     await client.connect(transport);
 } catch (error) {
     if (!(error instanceof UnauthorizedError)) throw error;
+    console.log("Authentication required. Complete sign-in in your browser.");
 }
 
 // Finish the flow from the callback
 const callbackUrl = await waitForCallback();
+console.log("Authentication callback received. Exchanging authorization code...");
 const params = new URL(callbackUrl).searchParams;
 
 if (params.get('state') !== provider.lastState) throw new Error('state mismatch');
 
 await transport.finishAuth(params);
+console.log("Authorization complete. Reconnecting to Gmail MCP server...");
 await client.connect(new StreamableHTTPClientTransport(mcpUrl, { authProvider: provider }));
+console.log("Connected to Gmail MCP server.");
 
 
 // List out tools
@@ -114,6 +120,7 @@ function getRequiredEnv(name: string | undefined): string {
 }
 
 async function onRedirect(url: URL) {
+    console.log("Opening the authorization page in your browser...");
     await open(url.toString());
 }
 
@@ -137,7 +144,8 @@ async function waitForCallback(): Promise<string> {
             reject(error);
         })
 
-        server.listen(8090, "127.0.0.1");
+        console.log("Waiting for the authentication callback on http://localhost:8090/callback...");
+        server.listen(8090);
    })
 }
 
