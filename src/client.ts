@@ -1,8 +1,8 @@
 import "dotenv/config";
 import open from "open";
+import http from "node:http";
 import { Client, StreamableHTTPClientTransport, UnauthorizedError } from "@modelcontextprotocol/client";
 import type { OAuthClientMetadata, OAuthClientProvider, OAuthTokens } from "@modelcontextprotocol/client";
-import type { Url } from "node:url";
 
 const clientId = getRequiredEnv(process.env.GMAIL_AUTH_CLIENT_ID);
 const clientSecret = getRequiredEnv(process.env.GMAIL_AUTH_CLIENT_SECRET);
@@ -72,8 +72,6 @@ try {
     if (!(error instanceof UnauthorizedError)) throw error;
 }
 
-// NEXT STEP: Add in the 'finish the flow from the callback' url here
-
 // Finish the flow from the callback
 const callbackUrl = await waitForCallback();
 const params = new URL(callbackUrl).searchParams;
@@ -110,8 +108,19 @@ async function onRedirect(url: URL) {
     await open(url.toString());
 }
 
-async function waitForCallback(): Promise<string | Url> {
-    
+async function waitForCallback(): Promise<string> {
+   return new Promise<string>((resolve, reject) => {
+        const server = http.createServer((req, res) => {
+            if (!req.url) {
+                reject(new Error("Callback request had no URL"));
+                return;
+            }
+
+            resolve(req.url);
+        })
+
+        server.listen(8090);
+   })
 }
 
 // Might be worth doing another tool call here, to double check that the auth persists
