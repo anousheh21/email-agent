@@ -1,3 +1,5 @@
+// Redundant - switched to using the Gmail API instead of MCP
+
 import "dotenv/config";
 import open from "open";
 import http from "node:http";
