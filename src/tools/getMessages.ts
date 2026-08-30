@@ -1,4 +1,3 @@
-// see what happens when you use the messages.list function. Is there a way of getting specific messages. For example search for particular messages using gmail search but from here instead of actually in gmail search
 import type { gmail_v1 } from 'googleapis';
 
 export async function getMessagesIds(gmail: gmail_v1.Gmail) {
