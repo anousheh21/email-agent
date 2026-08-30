@@ -50,15 +50,27 @@ async function getMessagesIds() {
     return;
   }
 
-  messages.forEach((message) => {
-    console.log(message)
-  })
+  return messages;
 }
 
-// To get as specified message, you need the message ID. I think maybe you need another function to get the ID?
-async function getMessage(id: string) {
+async function getMessage(id: string | null | undefined) {
+  if(id === null || id === undefined) {
+    console.log("Error: no related messages found");
+    return;
+  }
 
+  const result = await gmail.users.messages.get({
+    userId: 'me',
+    id: id,
+  });
+
+  return result;
 }
+
+// TODO: Function to get all unread messages
 
 // await listLabels();
-await getMessagesIds();
+const messages = await getMessagesIds();
+
+const message = await getMessage(messages?.[0]?.id);
+console.log(message?.data.snippet);
