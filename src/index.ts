@@ -2,6 +2,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { authenticate } from '@google-cloud/local-auth';
 import { google } from 'googleapis';
+import { getMessagesIds, getMessage } from './tools/getMessages.ts';
 
 const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
 const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
@@ -32,38 +33,10 @@ async function listLabels() {
   });
 }
 
-// see what happens when you use the messages.list function. Is there a way of getting specific messages. For example search for particular messages using gmail search but from here instead of actually in gmail search
-async function getMessagesIds() {
-  const result = await gmail.users.messages.list({
-    userId: 'me',
-  });
 
-  const messages = result.data.messages;
-
-  if(!messages || messages.length === 0) {
-    console.log('No messages found');
-    return;
-  }
-
-  return messages;
-}
-
-async function getMessage(id: string | null | undefined) {
-  if(id === null || id === undefined) {
-    console.log("Error: no related messages found");
-    return;
-  }
-
-  const result = await gmail.users.messages.get({
-    userId: 'me',
-    id: id,
-  });
-
-  return result;
-}
 
 await listLabels();
-const messages = await getMessagesIds();
+const messages = await getMessagesIds(gmail);
 
-const message = await getMessage(messages?.[0]?.id);
+const message = await getMessage(gmail, messages?.[0]?.id);
 console.log(message?.data.snippet);
