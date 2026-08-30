@@ -14,7 +14,7 @@ const auth = await authenticate({
 
 const gmail = google.gmail({ version: 'v1', auth });
 
-async function listLabels() {.
+async function listLabels() {
   const result = await gmail.users.labels.list({
     userId: 'me',
   });
