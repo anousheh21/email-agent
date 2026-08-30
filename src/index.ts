@@ -16,4 +16,4 @@ const auth = await authenticate({
 const gmail = google.gmail({ version: 'v1', auth });
 
 // Deterministic tool calling (for dev)
-toolCalls(gmail);
+await toolCalls(gmail);
