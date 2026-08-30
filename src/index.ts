@@ -37,4 +37,28 @@ async function listLabels() {
   });
 }
 
-await listLabels();
+// see what happens when you use the messages.list function. Is there a way of getting specific messages. For example search for particular messages using gmail search but from here instead of actually in gmail search
+async function getMessagesIds() {
+  const result = await gmail.users.messages.list({
+    userId: 'me',
+  });
+
+  const messages = result.data.messages;
+
+  if(!messages || messages.length === 0) {
+    console.log('No messages found');
+    return;
+  }
+
+  messages.forEach((message) => {
+    console.log(message)
+  })
+}
+
+// To get as specified message, you need the message ID. I think maybe you need another function to get the ID?
+async function getMessage(id: string) {
+
+}
+
+// await listLabels();
+await getMessagesIds();
