@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 
 import { getMessage, getMessagesIds } from "../../src/tools/getMessages.ts";
-import { createMockGmail, mockMessages } from "../mockTestData.ts";
+import { createMockGmail, mockMessages } from "./helpers/mockTestData.ts";
 
 test("getMessageIds returns messageIds correctly", async () => {
   const gmail = createMockGmail();

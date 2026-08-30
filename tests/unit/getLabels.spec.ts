@@ -1,7 +1,7 @@
 import { afterEach, expect, test, vi } from "vitest";
 
 import { listLabels } from "../../src/tools/getLabels.ts";
-import { createMockGmail, mockLabels } from "../mockTestData.ts";
+import { createMockGmail, mockLabels } from "./helpers/mockTestData.ts";
 
 afterEach(() => {
   vi.restoreAllMocks();
