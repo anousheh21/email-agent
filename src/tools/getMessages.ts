@@ -33,7 +33,6 @@ export async function getMessage(gmail: gmail_v1.Gmail, id: string | null | unde
   return result;
 }
 
-// Get all messages with attribute
 export async function getMessagesWithAttributes(gmail: gmail_v1.Gmail, messages: gmail_v1.Schema$Message[] | undefined, labelId?: string) {
   // TODO: this function currently gets messages based on label only. If you want to add more attributes that you can get messages based on, add to this function!
 
