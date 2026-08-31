@@ -11,5 +11,5 @@ export async function toolCalls(gmail: gmail_v1.Gmail) {
     console.log(message?.data.snippet);
     console.log(message?.data.labelIds);
 
-    const messageSnippets = await getMessagesWithAttributes(gmail, messages);
+    const messageSnippets = await getMessagesWithAttributes(gmail, messages, 'UNREAD');
 }

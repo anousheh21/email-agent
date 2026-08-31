@@ -35,44 +35,34 @@ export async function getMessage(gmail: gmail_v1.Gmail, id: string | null | unde
 
 // Get all messages with attribute
 export async function getMessagesWithAttributes(gmail: gmail_v1.Gmail, messages: gmail_v1.Schema$Message[] | undefined, labelId?: string) {
-
+  // TODO: this function currently gets messages based on label only. If you want to add more attributes that you can get messages based on, add to this function!
 
   if (messages === undefined) {
     console.log("No messages present");
     return;
   }
 
-const messageArray = await Promise.all(
+  const messageArray = await Promise.all(
     messages.map((message) => getMessage(gmail, message.id))
-)
+  )
 
-  for (const message of messageArray) {
-    console.log(message?.data.snippet);
+  let filteredByLabel: (GaxiosResponse<gmail_v1.Schema$Message> | undefined)[] = [];
+
+  if(labelId) {
+    filteredByLabel = messageArray.filter((message) => {
+      return message?.data.labelIds?.includes(labelId);
+    })
+  } else {
+    console.log("no label id provided");
   }
 
-//  if (labelId) {
-//     // Get all messages with a particular label
+  if (filteredByLabel.length > 0) {
+    for (const message of filteredByLabel) {
+      console.log(`${message?.data.snippet} has labels ${message?.data.labelIds}`);
+    }
 
-
-//  } else {
-//     // Gets all message snippets because no attributes were present
-//         messages.forEach( async (message) => {
-//         const messageData = await getMessage(gmail, message.id);
-//         const messageSnippet = messageData?.data.snippet;
-//         console.log(messageSnippet);
-//         })
-//     }
+    return filteredByLabel;
+  } else {
+    console.log("No messages match this label");
+  }
 }
-
-
-// Function that takes in a label as a parameter, and lists all emails with that label
-// Might get rid of this if getMessagesWithAttributes covers this
-export async function getMessagesWithLabel(labelId: string) {
-
-}
-
-// type Label = {
-//   id: string,
-//   name: string
-//   type: string
-// }
