@@ -1,4 +1,6 @@
 import type { gmail_v1 } from 'googleapis';
+import type { GaxiosResponse } from 'gaxios';
+
 
 export async function getMessagesIds(gmail: gmail_v1.Gmail) {
   // TODO: can you edit this function so that the ids get are more custom? Like get more messages, get a particular number of messages, etc.
@@ -32,20 +34,44 @@ export async function getMessage(gmail: gmail_v1.Gmail, id: string | null | unde
 }
 
 // Get all messages with attribute
-export async function getMessagesWithAttributes(gmail: gmail_v1.Gmail, messages: gmail_v1.Schema$Message[] | undefined) {
+export async function getMessagesWithAttributes(gmail: gmail_v1.Gmail, messages: gmail_v1.Schema$Message[] | undefined, labelId?: string) {
+
 
   if (messages === undefined) {
     console.log("No messages present");
     return;
   }
-  // First just want to get a list of messages, if no attributes are present
 
-  // Gets all message snippets
-  messages.forEach( async (message) => {
+  // Create an array of messages
+  const messageArray: GaxiosResponse<gmail_v1.Schema$Message>[] = [];
+
+  for (const message of messages) {
     const messageData = await getMessage(gmail, message.id);
-    const messageSnippet = messageData?.data.snippet;
-    console.log(messageSnippet);
-  })
+
+    if (messageData === undefined) {
+        console.log("returned")
+        return;
+    }
+    
+    messageArray.push(messageData);
+  }
+
+  for (const message of messageArray) {
+    console.log(message.data.snippet);
+  }
+
+//  if (labelId) {
+//     // Get all messages with a particular label
+
+
+//  } else {
+//     // Gets all message snippets because no attributes were present
+//         messages.forEach( async (message) => {
+//         const messageData = await getMessage(gmail, message.id);
+//         const messageSnippet = messageData?.data.snippet;
+//         console.log(messageSnippet);
+//         })
+//     }
 }
 
 
