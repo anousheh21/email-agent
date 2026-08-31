@@ -42,22 +42,12 @@ export async function getMessagesWithAttributes(gmail: gmail_v1.Gmail, messages:
     return;
   }
 
-  // Create an array of messages
-  const messageArray: GaxiosResponse<gmail_v1.Schema$Message>[] = [];
-
-  for (const message of messages) {
-    const messageData = await getMessage(gmail, message.id);
-
-    if (messageData === undefined) {
-        console.log("returned")
-        return;
-    }
-    
-    messageArray.push(messageData);
-  }
+const messageArray = await Promise.all(
+    messages.map((message) => getMessage(gmail, message.id))
+)
 
   for (const message of messageArray) {
-    console.log(message.data.snippet);
+    console.log(message?.data.snippet);
   }
 
 //  if (labelId) {
